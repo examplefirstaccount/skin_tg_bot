@@ -1,5 +1,3 @@
-import datetime
-
 from sqlalchemy import ForeignKey, String, Text, DateTime
 from sqlalchemy.orm import mapped_column, Mapped, DeclarativeBase
 
