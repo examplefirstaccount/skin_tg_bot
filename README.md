@@ -4,8 +4,6 @@
 - sub_category page | skin slider page = list of products e.g. for AK-47: Ice-Coaled, Asimov etc.
 - product page | ext slider page  = image, price and ext (Factory New, Minimal Wear, Field-Tested, etc.)
 
-TODO: add to git
-TODO: fix UI a bit (button names, add descriptions)
 TODO: add Docker deployment
 TODO: add comments
 TODO: add mypy

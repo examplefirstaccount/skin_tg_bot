@@ -29,14 +29,17 @@ def get_ext_caption(
 
     name = f'{skin_name} ({ext})' if ext != 'none' else skin_name
     if skin_type == 'Normal':
-        price = fmt.text(fmt.hcode('Price: '), fmt.hitalic('$', price))
+        price = fmt.text(fmt.hbold('Price: '), fmt.hitalic('$', price))
     else:
-        price = fmt.text(fmt.hcode('Basic:    '), fmt.hitalic('$', price), '\n', '\n',
-                         fmt.hcode(f'{skin_type}: '), fmt.hitalic('$', spec_price)
+        # 4 spaces for italic or code, 7 space for bold
+        price = fmt.text(fmt.hbold('Basic:       '), fmt.hitalic('$', price), '\n', '\n',
+                         fmt.hbold(f'{skin_type}: '), fmt.hitalic('$', spec_price),
+                         sep=''
                          )
     return fmt.text(
         fmt.hcode(name), '\n', '\n',
-        price, '\n', '\n'
+        price, '\n', '\n',
+        sep=''
     )
 
 

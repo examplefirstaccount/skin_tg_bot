@@ -18,10 +18,11 @@ from bot.keyboards.inline import get_skin_slider_menu
 router = Router(name='skin_slider')
 
 
-def get_skin_caption(skin_name: str) -> str:
+def get_skin_caption(skin_name: str, skin_descr: str) -> str:
     return fmt.text(
         fmt.hcode(skin_name), '\n', '\n',
-        'Some text and info.', '\n', '\n'
+        skin_descr.split('.')[0] + '.', '\n', '\n',
+        sep=''
     )
 
 
@@ -30,14 +31,15 @@ async def get_skins_data(
         sub_cat_id: int
 ) -> tuple:
 
-    sql_query = select(Skin.id, Skin.name, Skin.img).filter_by(sub_category_id=sub_cat_id).order_by(Skin.id)
+    sql_query = select(Skin.id, Skin.name,
+                       Skin.img, Skin.descr).filter_by(sub_category_id=sub_cat_id).order_by(Skin.id)
     result = await session.execute(sql_query)
     skins_data = result.all()
 
-    skin_ids, skin_names, skin_images = zip(*skins_data)
+    skin_ids, skin_names, skin_images, skins_descr = zip(*skins_data)
     skin_count = len(skins_data)
 
-    return skin_ids, skin_names, skin_images, skin_count
+    return skin_ids, skin_names, skin_images, skins_descr, skin_count
 
 
 async def start_skin_slider(
@@ -47,12 +49,12 @@ async def start_skin_slider(
         start_i: int
 ) -> dict:
 
-    skin_ids, skin_names, skin_images, skin_count = await get_skins_data(session, sub_cat_id)
-    slider = {'skin_ids': skin_ids, 'skin_names': skin_names, 'skin_images': skin_images,
+    skin_ids, skin_names, skin_images, skins_descr, skin_count = await get_skins_data(session, sub_cat_id)
+    slider = {'skin_ids': skin_ids, 'skin_names': skin_names, 'skin_images': skin_images, 'skins_descr': skins_descr,
               'skin_count': skin_count, 'sub_cat_id': sub_cat_id, 'pos': start_i}
 
     photo = skin_images[start_i]
-    caption = get_skin_caption(skin_name=skin_names[start_i])
+    caption = get_skin_caption(skin_name=skin_names[start_i], skin_descr=skins_descr[start_i])
     reply_markup = get_skin_slider_menu(skin_id=skin_ids[start_i],
                                         curr_pos=start_i + 1,
                                         skins_count=skin_count
@@ -81,7 +83,7 @@ async def update_skin_slider(
 
     slider['pos'] = curr_i
     media = InputMediaPhoto(media=slider['skin_images'][curr_i],
-                            caption=get_skin_caption(slider['skin_names'][curr_i])
+                            caption=get_skin_caption(slider['skin_names'][curr_i], slider['skins_descr'][curr_i])
                             )
 
     reply_markup = get_skin_slider_menu(skin_id=slider['skin_ids'][curr_i],

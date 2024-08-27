@@ -22,3 +22,10 @@ LG_EXTERIORS = {'fn': 'Factory New', 'mw': 'Minimal Wear', 'ft': 'Field-Tested',
                 'bs': 'Battle-Scarred'}
 SH_EXTERIORS = {'Factory New': 'fn', 'Minimal Wear': 'mw', 'Field-Tested': 'ft', 'Well-Worn': 'ww',
                 'Battle-Scarred': 'bs'}
+
+BACK_BTN = "↩️ Back"
+BUY_BTN = "🛒 Buy"
+LEFT_BTN = "⬅️"  # ❮
+RIGHT_BTN = "➡️"  # ❯
+SBER_ICON = "💳 Sber"
+PAYMASTER_ICON = "💰 Paymaster"

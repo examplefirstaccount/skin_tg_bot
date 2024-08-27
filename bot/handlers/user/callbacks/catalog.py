@@ -37,3 +37,9 @@ async def show_sub_categories(
 async def back_to_menu(cb: types.CallbackQuery):
 
     await cb.message.delete()
+
+
+@router.callback_query(F.data == '#')
+async def answer_empty_callback(cb: types.CallbackQuery):
+
+    await cb.answer()

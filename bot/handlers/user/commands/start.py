@@ -10,7 +10,7 @@ def get_start_msg(name: str):
 🤖 Welcome to the skin shop bot.
 
 🛍️ Use /shop command to go to the catalog.
-💰 Payment methods: PayMaster, Sber and Qiwi.
+💰 Payment methods: PayMaster and Sber.
 
 ❓ Something went wrong? Type /help and admins solve ur problem"""
 
