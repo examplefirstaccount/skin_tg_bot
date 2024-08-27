@@ -1,0 +1,10 @@
+.direnv
+.mypy_cache
+.pytest_cache
+.ruff_cache
+.env
+__pycache__
+node_modules
+.idea
+venv
+test.py
