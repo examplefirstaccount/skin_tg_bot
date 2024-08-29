@@ -19,12 +19,10 @@ async def main():
     default = DefaultBotProperties(parse_mode='HTML')
     bot = Bot(token=config.BOT_TOKEN, default=default)
 
-    # redis = Redis()
-    # storage = RedisStorage(redis=redis)
+    redis = Redis(host=config.REDIS_HOST, port=config.REDIS_PORT, db=config.REDIS_DB)
+    storage = RedisStorage(redis=redis)
 
-    # dp = get_dispatcher(storage=storage, session_pool=sessionmaker)
-
-    dp = get_dispatcher(session_pool=sessionmaker)
+    dp = get_dispatcher(storage=storage, session_pool=sessionmaker)
 
     await set_default_commands(bot=bot)
     await on_startup_notify(bot=bot)
