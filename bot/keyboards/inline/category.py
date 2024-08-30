@@ -6,6 +6,17 @@ from bot.data.config import BACK_BTN
 
 
 def get_categories(data) -> InlineKeyboardMarkup:
+    """
+    Creates an inline keyboard for browsing categories.
+
+    Generates buttons for each category and includes a back button to return to the main menu.
+
+    Args:
+        data (list): A list of category objects, each with a name and ID.
+
+    Returns:
+        InlineKeyboardMarkup: The constructed keyboard with category buttons.
+    """
     builder = InlineKeyboardBuilder()
 
     for cat in data:

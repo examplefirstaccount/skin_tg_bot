@@ -6,6 +6,15 @@ from bot.data.config import BACK_BTN, SBER_ICON, PAYMASTER_ICON
 
 
 def get_payment_methods() -> InlineKeyboardMarkup:
+    """
+    Creates a keyboard for selecting a payment method.
+
+    Generates buttons for available payment methods, including Sber and PayMaster,
+    along with a back button to return to the previous menu.
+
+    Returns:
+        InlineKeyboardMarkup: The constructed keyboard with payment method options.
+    """
     builder = InlineKeyboardBuilder()
 
     builder.button(text=SBER_ICON, callback_data=PaymentCallback(method='sber', action='choose').pack())

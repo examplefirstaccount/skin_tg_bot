@@ -1,5 +1,12 @@
-"""The file contains handlers for Skin type and Payment method choosing pages"""
+"""
+This module contains handlers for skin type selection and payment method selection pages.
 
+Handlers:
+    - send_payment_methods: Handles the selection of skin types and prompts the user to choose a payment method.
+    - back_to_ext_slider: Handles the callback for going back to the exterior slider from the skin type selection page.
+    - start_payment: Initiates the payment process after a payment method is selected.
+    - back_from_payment_methods: Handles the callback for going back from the payment methods page.
+"""
 
 from aiogram import types, Router, F, Bot
 from aiogram.fsm.context import FSMContext
@@ -18,6 +25,17 @@ async def send_payment_methods(
         state: FSMContext,
         callback_data: SkinTypeCallback
 ):
+    """
+    Handles the callback when a user chooses a skin type.
+
+    Updates the FSM state with the selected skin type and price,
+    then prompts the user to select a payment method.
+
+    Args:
+        cb (types.CallbackQuery): The callback query object from the user.
+        state (FSMContext): The current FSM state of the user.
+        callback_data (SkinTypeCallback): The data from the callback, containing the chosen skin type and price.
+    """
 
     buy_type = callback_data.name
     buy_price = callback_data.price
@@ -32,6 +50,15 @@ async def back_to_ext_slider(
         cb: types.CallbackQuery,
         state: FSMContext
 ):
+    """
+    Handles the callback to return to the exterior slider from the skin type choosing page.
+
+    Changes the state back to the exterior slider and deletes the current message.
+
+    Args:
+        cb (types.CallbackQuery): The callback query object from the user.
+        state (FSMContext): The current FSM state of the user.
+    """
 
     await state.set_state(ShopState.ExtSlider)
     await cb.message.delete()
@@ -44,6 +71,18 @@ async def start_payment(
         state: FSMContext,
         callback_data: PaymentCallback
 ):
+    """
+    Initiates the payment process once the user selects a payment method.
+
+    Retrieves the necessary data from the state, constructs the payment title, and calls
+    the `send_invoice` function to send the payment invoice to the user.
+
+    Args:
+        cb (types.CallbackQuery): The callback query object from the user.
+        bot (Bot): The bot instance used to send messages.
+        state (FSMContext): The current FSM state of the user.
+        callback_data (PaymentCallback): The data from the callback, containing the chosen payment method.
+    """
 
     method = callback_data.method
     state_data = await state.get_data()
@@ -63,6 +102,16 @@ async def back_from_payment_methods(
         cb: types.CallbackQuery,
         state: FSMContext
 ):
+    """
+    Handles the callback to go back from the payment methods page.
+
+    Checks if the skin type selection was skipped; if so, sets the state back to the exterior slider,
+    otherwise sets it back to the skin type selection. Deletes the current message.
+
+    Args:
+        cb (types.CallbackQuery): The callback query object from the user.
+        state (FSMContext): The current FSM state of the user.
+    """
 
     state_data = await state.get_data()
     skipped = state_data['skipped_skin_type_choosing']

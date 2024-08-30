@@ -1,4 +1,9 @@
-"""Handler for /shop command"""
+"""
+Handler for the /shop command.
+
+Handler:
+    - show_categories: Displays available categories when the user enters the /shop command.
+"""
 
 from aiogram import types, Router
 from aiogram.filters import Command
@@ -20,6 +25,17 @@ async def show_categories(
         state: FSMContext,
         session: AsyncSession
 ):
+    """
+    Displays a list of all categories available in the shop.
+
+    Fetches categories from the database, updates the FSM state to Catalog,
+    and sends the categories as an inline keyboard to the user.
+
+    Args:
+        msg (types.Message): The message object containing the /shop command from the user.
+        state (FSMContext): The current FSM state of the user.
+        session (AsyncSession): The database session for querying categories.
+    """
 
     sql_query = select(Category)
     result = await session.execute(sql_query)

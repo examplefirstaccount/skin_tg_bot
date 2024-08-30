@@ -1,11 +1,25 @@
-"""Handler for /start command"""
+"""
+Handler for the /start command.
 
+Handlers:
+    - command_start: Sends a welcome message to the user when they use the /start command.
+"""
 
 from aiogram import types, Router
 from aiogram.filters import CommandStart
 
 
 def get_start_msg(name: str):
+    """
+    Generates a welcome message for the user.
+
+    Args:
+        name (str): The name of the user.
+
+    Returns:
+        str: A formatted welcome message.
+    """
+
     return f"""Hello {name} 👋
 🤖 Welcome to the skin shop bot.
 
@@ -20,5 +34,10 @@ router = Router(name='start')
 
 @router.message(CommandStart())
 async def command_start(msg: types.Message):
+    """
+    Sends a welcome message to the user when they use the /start command.
 
+    Args:
+        msg (types.Message): The message object containing the /start command from the user.
+    """
     await msg.answer(text=get_start_msg(msg.from_user.full_name))

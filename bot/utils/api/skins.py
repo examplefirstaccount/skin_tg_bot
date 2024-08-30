@@ -2,7 +2,8 @@ import requests
 
 from bot.data import config
 
-IMAGE_API_ENDPOINT = "https://pub-5f12f7508ff04ae5925853dee0438460.r2.dev/data/images"
+IMAGE_API_ENDPOINT = 'https://pub-5f12f7508ff04ae5925853dee0438460.r2.dev/data/images'
+CURRENCY_API_ENDPOINT = 'https://www.amdoren.com/api/currency.php'
 UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36'
 
 headers = {'user-agent': UA}
@@ -11,10 +12,19 @@ cookies = dict()
 
 def get_ext_prices(ext_ids: list) -> dict:
     """
-    Get trading prices for skins
+    Retrieves the most relevant trading prices for skins from the CS:GO market.
 
-    :param ext_ids: skins' api ids
-    :return: most relevant price for each skin
+    This function sends a GraphQL request to retrieve the latest trader log prices
+    for specified skin IDs, and returns the most recent price for each skin.
+
+    Args:
+        ext_ids (list): A list of skin API IDs to query prices for.
+
+    Returns:
+        dict: A dictionary mapping each skin ID to its most recent price.
+
+    Raises:
+        requests.exceptions.RequestException: If the request fails or returns a non-200 status code.
     """
 
     ext_ids = [ext_id for ext_id in ext_ids if ext_id]
@@ -46,10 +56,19 @@ def get_ext_prices(ext_ids: list) -> dict:
 
 def get_ext_images(skin_name: str) -> dict:
     """
-    Get all available patterns of skin
+    Retrieves available patterns (images) for a specified skin.
 
-    :param skin_name: skin name
-    :return: one skin pattern for each existing exterior of a skin
+    Sends a request to obtain all patterns of the specified skin, and
+    returns one pattern image for each existing exterior (condition) of the skin.
+
+    Args:
+        skin_name (str): The name of the skin to retrieve patterns for.
+
+    Returns:
+        dict: A dictionary mapping each skin exterior to its corresponding pattern image URL.
+
+    Raises:
+        requests.exceptions.RequestException: If the request fails or returns a non-200 status code.
     """
 
     json_data = {
@@ -93,13 +112,22 @@ def get_ext_images(skin_name: str) -> dict:
 
 def get_ex_rate(key: str):
     """
-    Get the exchange rate against the USD
+    Retrieves the current exchange rate of a specified currency against USD.
 
-    :param key: currency code  (ex. CNY)
-    :return: up-to-date exchange rate
+    Fetches the latest exchange rate for the given currency key using an external
+    currency exchange API.
+
+    Args:
+        key (str): The currency code (e.g., 'CNY' for Chinese Yuan).
+
+    Returns:
+        float: The current exchange rate rounded to the nearest whole number.
+
+    Raises:
+        requests.exceptions.RequestException: If the request fails or returns a non-200 status code.
     """
 
-    url = f'https://www.amdoren.com/api/currency.php?api_key={config.CURRENCY_API_KEY}&from=USD&to={key}'
+    url = f'{CURRENCY_API_ENDPOINT}?api_key={config.CURRENCY_API_KEY}&from=USD&to={key}'
     response = requests.get(url)
     if response.status_code == 200:
         res = response.json()

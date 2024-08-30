@@ -6,6 +6,19 @@ from bot.data.config import BACK_BTN
 
 
 def get_sub_cats(cat_id: int, data) -> InlineKeyboardMarkup:
+    """
+    Creates an inline keyboard for subcategories within a category.
+
+    Generates buttons for each subcategory, with an additional back button to return
+    to the previous category page.
+
+    Args:
+        cat_id (int): The ID of the current category.
+        data (list): A list of subcategory objects, each with a name and ID.
+
+    Returns:
+        InlineKeyboardMarkup: The constructed keyboard with subcategory buttons.
+    """
     builder = InlineKeyboardBuilder()
 
     for sub in data:
