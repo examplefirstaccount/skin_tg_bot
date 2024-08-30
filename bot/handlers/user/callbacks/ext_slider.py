@@ -1,5 +1,15 @@
-"""The file contains handlers for Ext slider (list of exteriors for skin)"""
+"""
+Handlers for the Ext slider (list of exteriors for skins).
 
+Handlers:
+    - update_slider: Handles navigation through the exterior slider (next/previous).
+    - buy_skin: Handles the process of initiating a skin purchase.
+    - back_to_skin_slider: Handles the callback to return to the skin slider.
+Utilities:
+    - get_ext_caption: Generates a formatted caption for the exterior slider.
+    - get_ext_data: Retrieves data for the exterior slider, including images and prices.
+    - start_ext_slider: Initializes the exterior slider with the first exterior in the list.
+"""
 
 from aiogram import types, Router, F
 from aiogram.fsm.context import FSMContext
@@ -26,6 +36,22 @@ def get_ext_caption(
         price: float,
         spec_price: float
 ) -> str:
+    """
+    Generates a formatted caption for the exterior slider.
+
+    Formats the caption based on skin name, type, exterior, and prices. Displays basic
+    and special prices if applicable.
+
+    Args:
+        skin_name (str): The name of the skin.
+        skin_type (str): The type of the skin (e.g., 'Normal', 'StatTrak').
+        ext (str): The exterior type (e.g., 'Factory New').
+        price (float): The basic price of the skin.
+        spec_price (float): The special price of the skin if applicable.
+
+    Returns:
+        str: A formatted string for the caption.
+    """
 
     name = f'{skin_name} ({ext})' if ext != 'none' else skin_name
     if skin_type == 'Normal':
@@ -47,6 +73,19 @@ async def get_ext_data(
         session: AsyncSession,
         skin_id: int
 ) -> tuple:
+    """
+    Retrieves data for the exterior slider, including images and prices.
+
+    Queries the database for the skin's name, type, and exteriors. Fetches images and prices
+    for each exterior.
+
+    Args:
+        session (AsyncSession): The database session for executing queries.
+        skin_id (int): The ID of the skin to fetch data for.
+
+    Returns:
+        tuple: A tuple containing a list of exterior data, the skin type, and the skin name.
+    """
 
     sql_query = select(Skin.name, Skin.type, Skin.category_id).filter_by(id=skin_id)
     result = await session.execute(sql_query)
@@ -92,6 +131,20 @@ async def start_ext_slider(
         skin_id: int,
         start_i: int
 ) -> dict:
+    """
+    Initializes the exterior slider with the first exterior in the list.
+
+    Fetches exterior data and displays the first exterior with its image, caption, and slider menu.
+
+    Args:
+        cb (types.CallbackQuery): The callback query object from the user.
+        session (AsyncSession): The database session for querying exteriors.
+        skin_id (int): The ID of the skin to display exteriors for.
+        start_i (int): The starting index for the slider (typically 0).
+
+    Returns:
+        dict: A dictionary containing slider data including exterior details and the current position.
+    """
 
     ext_data, skin_type, skin_name = await get_ext_data(session, skin_id)
     slider = {'ext_data': ext_data, 'skin_type': skin_type, 'skin_name': skin_name,
@@ -119,6 +172,16 @@ async def update_slider(
         cb: types.CallbackQuery,
         state: FSMContext
 ):
+    """
+    Handles navigation through the exterior slider (next/previous).
+
+    Updates the slider to show the next or previous exterior based on user input,
+    updating the image, caption, and navigation buttons.
+
+    Args:
+        cb (types.CallbackQuery): The callback query object from the user.
+        state (FSMContext): The current FSM state of the user.
+    """
 
     state_data = await state.get_data()
     slider = state_data['ext_slider']
@@ -157,6 +220,16 @@ async def buy_skin(
         cb: types.CallbackQuery,
         state: FSMContext,
 ):
+    """
+    Handles the process of initiating a skin purchase.
+
+    Determines the type and price of the selected skin based on the current slider
+    position and initiates the payment method selection.
+
+    Args:
+        cb (types.CallbackQuery): The callback query object from the user.
+        state (FSMContext): The current FSM state of the user.
+    """
 
     state_data = await state.get_data()
     slider = state_data['ext_slider']
@@ -193,6 +266,15 @@ async def back_to_skin_slider(
         cb: types.CallbackQuery,
         state: FSMContext
 ):
+    """
+    Handles the callback to return to the skin slider.
+
+    Changes the FSM state back to the SkinSlider state and deletes the current message.
+
+    Args:
+        cb (types.CallbackQuery): The callback query object from the user.
+        state (FSMContext): The current FSM state of the user.
+    """
 
     await state.set_state(ShopState.SkinSlider)
     await cb.message.delete()

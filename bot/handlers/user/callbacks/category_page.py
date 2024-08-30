@@ -1,5 +1,10 @@
-"""The file contains handlers for Category page (list of sub categories)"""
+"""
+Handlers for the Category page (list of sub-categories).
 
+Handlers:
+    - show_skins: Displays skins when a sub-category is selected.
+    - back_to_category_page: Handles the callback for returning to the main category page.
+"""
 
 from aiogram import types, Router, F
 from aiogram.fsm.context import FSMContext
@@ -20,6 +25,19 @@ async def show_skins(
         callback_data: SubCategoryCallback,
         session: AsyncSession
 ):
+    """
+    Displays skins when a sub-category is selected.
+
+    Initiates the skin slider for the selected sub-category and updates
+    the FSM state to SkinSlider. The slider starts from the first item in
+    the sub-category.
+
+    Args:
+        cb (types.CallbackQuery): The callback query object from the user.
+        state (FSMContext): The current FSM state of the user.
+        callback_data (SubCategoryCallback): The data from the callback, containing the selected sub-category ID.
+        session (AsyncSession): The database session for querying skins.
+    """
 
     sub_cat_id = callback_data.id
 
@@ -33,6 +51,15 @@ async def back_to_category_page(
         cb: types.CallbackQuery,
         state: FSMContext,
 ):
+    """
+    Handles the callback for returning to the main category page.
+
+    Resets the FSM state to Catalog and deletes the current message.
+
+    Args:
+        cb (types.CallbackQuery): The callback query object from the user.
+        state (FSMContext): The current FSM state of the user.
+    """
 
     await state.set_state(ShopState.Catalog)
     await cb.message.delete()

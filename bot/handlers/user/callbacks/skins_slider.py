@@ -1,5 +1,15 @@
-"""The file contains handlers for Skin slider (list of skins for item)"""
+"""
+Handlers for the Skin slider (list of skins for an item).
 
+Handlers:
+    - update_skin_slider: Handles navigation through the skin slider (next/previous).
+    - show_skin: Initiates the exterior slider for the selected skin.
+    - back_to_sub_cat_page: Handles the callback to return to the sub-category page.
+Utilities:
+    - get_skin_caption: Generates a formatted caption for the skin slider.
+    - get_skins_data: Retrieves data for the skin slider, including images and descriptions.
+    - start_skin_slider: Initializes the skin slider with the first skin in the list.
+"""
 
 from aiogram import types, Router, F
 from aiogram.fsm.context import FSMContext
@@ -19,6 +29,18 @@ router = Router(name='skin_slider')
 
 
 def get_skin_caption(skin_name: str, skin_descr: str) -> str:
+    """
+    Generates a formatted caption for the skin slider.
+
+    Formats the caption using the skin's name and a brief description.
+
+    Args:
+        skin_name (str): The name of the skin.
+        skin_descr (str): A description of the skin.
+
+    Returns:
+        str: A formatted string for the caption.
+    """
     return fmt.text(
         fmt.hcode(skin_name), '\n', '\n',
         skin_descr.split('.')[0] + '.', '\n', '\n',
@@ -30,6 +52,19 @@ async def get_skins_data(
         session: AsyncSession,
         sub_cat_id: int
 ) -> tuple:
+    """
+    Retrieves data for the skin slider, including images and descriptions.
+
+    Queries the database for skins under a specific sub-category and gathers
+    their IDs, names, images, and descriptions.
+
+    Args:
+        session (AsyncSession): The database session for executing queries.
+        sub_cat_id (int): The ID of the sub-category to fetch skins for.
+
+    Returns:
+        tuple: A tuple containing lists of skin IDs, names, images, descriptions, and the total count of skins.
+    """
 
     sql_query = select(Skin.id, Skin.name,
                        Skin.img, Skin.descr).filter_by(sub_category_id=sub_cat_id).order_by(Skin.id)
@@ -48,17 +83,39 @@ async def start_skin_slider(
         sub_cat_id: int,
         start_i: int
 ) -> dict:
+    """
+    Initializes the skin slider with the first skin in the list.
+
+    Fetches skin data and displays the first skin with its image, caption, and slider menu.
+
+    Args:
+        cb (types.CallbackQuery): The callback query object from the user.
+        session (AsyncSession): The database session for querying skins.
+        sub_cat_id (int): The ID of the sub-category to display skins for.
+        start_i (int): The starting index for the slider (typically 0).
+
+    Returns:
+        dict: A dictionary containing slider data including skin details and the current position.
+    """
 
     skin_ids, skin_names, skin_images, skins_descr, skin_count = await get_skins_data(session, sub_cat_id)
-    slider = {'skin_ids': skin_ids, 'skin_names': skin_names, 'skin_images': skin_images, 'skins_descr': skins_descr,
-              'skin_count': skin_count, 'sub_cat_id': sub_cat_id, 'pos': start_i}
+    slider = {
+        'skin_ids': skin_ids,
+        'skin_names': skin_names,
+        'skin_images': skin_images,
+        'skins_descr': skins_descr,
+        'skin_count': skin_count,
+        'sub_cat_id': sub_cat_id,
+        'pos': start_i
+    }
 
     photo = skin_images[start_i]
     caption = get_skin_caption(skin_name=skin_names[start_i], skin_descr=skins_descr[start_i])
-    reply_markup = get_skin_slider_menu(skin_id=skin_ids[start_i],
-                                        curr_pos=start_i + 1,
-                                        skins_count=skin_count
-                                        )
+    reply_markup = get_skin_slider_menu(
+        skin_id=skin_ids[start_i],
+        curr_pos=start_i + 1,
+        skins_count=skin_count
+    )
 
     await cb.message.answer_photo(photo=photo, caption=caption, reply_markup=reply_markup)
 
@@ -70,6 +127,16 @@ async def update_skin_slider(
         cb: types.CallbackQuery,
         state: FSMContext
 ):
+    """
+    Handles navigation through the skin slider (next/previous).
+
+    Updates the slider to show the next or previous skin based on user input,
+    updating the image, caption, and navigation buttons.
+
+    Args:
+        cb (types.CallbackQuery): The callback query object from the user.
+        state (FSMContext): The current FSM state of the user.
+    """
 
     state_data = await state.get_data()
     slider = state_data['skin_slider']
@@ -103,6 +170,18 @@ async def show_skin(
         callback_data: SkinCallback,
         session: AsyncSession
 ):
+    """
+    Handles the transition to viewing specific exteriors of a selected skin.
+
+    Transitions the state to the exterior slider for the selected skin, initializing the slider
+    with exteriors for the chosen skin.
+
+    Args:
+        cb (types.CallbackQuery): The callback query object from the user.
+        state (FSMContext): The current FSM state of the user.
+        callback_data (SkinCallback): The callback data containing the skin ID to view.
+        session (AsyncSession): The database session for querying skin details.
+    """
 
     skin_id = callback_data.id
 
@@ -116,6 +195,15 @@ async def back_to_sub_cat_page(
         cb: types.CallbackQuery,
         state: FSMContext
 ):
+    """
+    Handles the callback to return to the sub-category page.
+
+    Changes the FSM state back to the CategoryPage state and deletes the current message.
+
+    Args:
+        cb (types.CallbackQuery): The callback query object from the user.
+        state (FSMContext): The current FSM state of the user.
+    """
 
     await state.set_state(ShopState.CategoryPage)
     await cb.message.delete()
