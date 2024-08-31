@@ -8,22 +8,22 @@ Handlers:
     - back_from_payment_methods: Handles the callback for going back from the payment methods page.
 """
 
-from aiogram import types, Router, F, Bot
+from aiogram import Bot, F, Router, types
 from aiogram.fsm.context import FSMContext
 
-from bot.states import ShopState
 from bot.handlers.user.payment import send_invoice
-from bot.utils.callbacks import PaymentCallback, SkinTypeCallback
 from bot.keyboards.inline import get_payment_methods
+from bot.states import ShopState
+from bot.utils.callbacks import PaymentCallback, SkinTypeCallback
 
-router = Router(name='pre_invoice')
+router = Router(name="pre_invoice")
 
 
-@router.callback_query(SkinTypeCallback.filter(F.action == 'choose'), ShopState.ChooseSkinType)
+@router.callback_query(
+    SkinTypeCallback.filter(F.action == "choose"), ShopState.ChooseSkinType
+)
 async def send_payment_methods(
-        cb: types.CallbackQuery,
-        state: FSMContext,
-        callback_data: SkinTypeCallback
+    cb: types.CallbackQuery, state: FSMContext, callback_data: SkinTypeCallback
 ):
     """
     Handles the callback when a user chooses a skin type.
@@ -40,16 +40,21 @@ async def send_payment_methods(
     buy_type = callback_data.name
     buy_price = callback_data.price
 
-    await state.update_data(buy_type=buy_type, buy_price=buy_price, skipped_skin_type_choosing=False)
+    await state.update_data(
+        buy_type=buy_type, buy_price=buy_price, skipped_skin_type_choosing=False
+    )
     await state.set_state(ShopState.ChoosePaymentMethod)
-    await cb.message.answer('Choose payment method', reply_markup=get_payment_methods())
+    match msg := cb.message:
+        case types.Message:
+            await msg.answer(
+                "Choose payment method", reply_markup=get_payment_methods()
+            )
+        case _:
+            print("Message to be answered is inaccessible or missing")
 
 
-@router.callback_query(F.data == 'back_to_ext_slider', ShopState.ChooseSkinType)
-async def back_to_ext_slider(
-        cb: types.CallbackQuery,
-        state: FSMContext
-):
+@router.callback_query(F.data == "back_to_ext_slider", ShopState.ChooseSkinType)
+async def back_to_ext_slider(cb: types.CallbackQuery, state: FSMContext):
     """
     Handles the callback to return to the exterior slider from the skin type choosing page.
 
@@ -61,15 +66,18 @@ async def back_to_ext_slider(
     """
 
     await state.set_state(ShopState.ExtSlider)
-    await cb.message.delete()
+    match cb.message:
+        case types.Message:
+            await cb.message.delete()
+        case _:
+            print("Message to be deleted is inaccessible or missing")
 
 
-@router.callback_query(PaymentCallback.filter(F.action == 'choose'), ShopState.ChoosePaymentMethod)
+@router.callback_query(
+    PaymentCallback.filter(F.action == "choose"), ShopState.ChoosePaymentMethod
+)
 async def start_payment(
-        cb: types.CallbackQuery,
-        bot: Bot,
-        state: FSMContext,
-        callback_data: PaymentCallback
+    cb: types.CallbackQuery, bot: Bot, state: FSMContext, callback_data: PaymentCallback
 ):
     """
     Initiates the payment process once the user selects a payment method.
@@ -87,21 +95,18 @@ async def start_payment(
     method = callback_data.method
     state_data = await state.get_data()
 
-    buy_title = state_data['buy_title']
-    buy_type = state_data['buy_type']
-    buy_price = state_data['buy_price']
+    buy_title = state_data["buy_title"]
+    buy_type = state_data["buy_type"]
+    buy_price = state_data["buy_price"]
 
-    title = f'{buy_type} {buy_title}' if buy_type != 'Basic' else buy_title
+    title = f"{buy_type} {buy_title}" if buy_type != "Basic" else buy_title
 
     await state.set_state(ShopState.Payment)
     await send_invoice(cb=cb, bot=bot, title=title, price=buy_price, method=method)
 
 
-@router.callback_query(F.data == 'back_from_pay_methods', ShopState.ChoosePaymentMethod)
-async def back_from_payment_methods(
-        cb: types.CallbackQuery,
-        state: FSMContext
-):
+@router.callback_query(F.data == "back_from_pay_methods", ShopState.ChoosePaymentMethod)
+async def back_from_payment_methods(cb: types.CallbackQuery, state: FSMContext):
     """
     Handles the callback to go back from the payment methods page.
 
@@ -114,11 +119,15 @@ async def back_from_payment_methods(
     """
 
     state_data = await state.get_data()
-    skipped = state_data['skipped_skin_type_choosing']
+    skipped = state_data["skipped_skin_type_choosing"]
 
     if skipped:
         await state.set_state(ShopState.ExtSlider)
     else:
         await state.set_state(ShopState.ChooseSkinType)
 
-    await cb.message.delete()
+    match cb.message:
+        case types.Message:
+            await cb.message.delete()
+        case _:
+            print("Message to be deleted is inaccessible or missing")

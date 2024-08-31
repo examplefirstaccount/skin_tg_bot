@@ -11,21 +11,21 @@ Utilities:
     - start_skin_slider: Initializes the skin slider with the first skin in the list.
 """
 
-from aiogram import types, Router, F
+from aiogram import F, Router, types
 from aiogram.fsm.context import FSMContext
-from aiogram.utils import markdown as fmt
 from aiogram.types.input_media_photo import InputMediaPhoto
-
+from aiogram.utils import markdown as fmt
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from bot.db.models import Skin
-from bot.states import ShopState
-from bot.utils.callbacks import SkinCallback
+from bot.exceptions import DataRetrievalError
 from bot.handlers.user.callbacks.ext_slider import start_ext_slider
 from bot.keyboards.inline import get_skin_slider_menu
+from bot.states import ShopState
+from bot.utils.callbacks import SkinCallback
 
-router = Router(name='skin_slider')
+router = Router(name="skin_slider")
 
 
 def get_skin_caption(skin_name: str, skin_descr: str) -> str:
@@ -42,16 +42,17 @@ def get_skin_caption(skin_name: str, skin_descr: str) -> str:
         str: A formatted string for the caption.
     """
     return fmt.text(
-        fmt.hcode(skin_name), '\n', '\n',
-        skin_descr.split('.')[0] + '.', '\n', '\n',
-        sep=''
+        fmt.hcode(skin_name),
+        "\n",
+        "\n",
+        skin_descr.split(".")[0] + ".",
+        "\n",
+        "\n",
+        sep="",
     )
 
 
-async def get_skins_data(
-        session: AsyncSession,
-        sub_cat_id: int
-) -> tuple:
+async def get_skins_data(session: AsyncSession, sub_cat_id: int) -> tuple:
     """
     Retrieves data for the skin slider, including images and descriptions.
 
@@ -64,12 +65,20 @@ async def get_skins_data(
 
     Returns:
         tuple: A tuple containing lists of skin IDs, names, images, descriptions, and the total count of skins.
+
+    Raises:
+        DataRetrievalError: If no skins were found for provided sub_cat_id.
     """
 
-    sql_query = select(Skin.id, Skin.name,
-                       Skin.img, Skin.descr).filter_by(sub_category_id=sub_cat_id).order_by(Skin.id)
+    sql_query = (
+        select(Skin.id, Skin.name, Skin.img, Skin.descr)
+        .filter_by(sub_category_id=sub_cat_id)
+        .order_by(Skin.id)
+    )
     result = await session.execute(sql_query)
     skins_data = result.all()
+    if len(skins_data) == 0:
+        raise DataRetrievalError(f"No skins found for sub-category {sub_cat_id}.")
 
     skin_ids, skin_names, skin_images, skins_descr = zip(*skins_data)
     skin_count = len(skins_data)
@@ -78,10 +87,7 @@ async def get_skins_data(
 
 
 async def start_skin_slider(
-        cb: types.CallbackQuery,
-        session: AsyncSession,
-        sub_cat_id: int,
-        start_i: int
+    cb: types.CallbackQuery, session: AsyncSession, sub_cat_id: int, start_i: int
 ) -> dict:
     """
     Initializes the skin slider with the first skin in the list.
@@ -98,35 +104,38 @@ async def start_skin_slider(
         dict: A dictionary containing slider data including skin details and the current position.
     """
 
-    skin_ids, skin_names, skin_images, skins_descr, skin_count = await get_skins_data(session, sub_cat_id)
+    skin_ids, skin_names, skin_images, skins_descr, skin_count = await get_skins_data(
+        session, sub_cat_id
+    )
     slider = {
-        'skin_ids': skin_ids,
-        'skin_names': skin_names,
-        'skin_images': skin_images,
-        'skins_descr': skins_descr,
-        'skin_count': skin_count,
-        'sub_cat_id': sub_cat_id,
-        'pos': start_i
+        "skin_ids": skin_ids,
+        "skin_names": skin_names,
+        "skin_images": skin_images,
+        "skins_descr": skins_descr,
+        "skin_count": skin_count,
+        "sub_cat_id": sub_cat_id,
+        "pos": start_i,
     }
 
     photo = skin_images[start_i]
-    caption = get_skin_caption(skin_name=skin_names[start_i], skin_descr=skins_descr[start_i])
+    caption = get_skin_caption(
+        skin_name=skin_names[start_i], skin_descr=skins_descr[start_i]
+    )
     reply_markup = get_skin_slider_menu(
-        skin_id=skin_ids[start_i],
-        curr_pos=start_i + 1,
-        skins_count=skin_count
+        skin_id=skin_ids[start_i], curr_pos=start_i + 1, skins_count=skin_count
     )
 
-    await cb.message.answer_photo(photo=photo, caption=caption, reply_markup=reply_markup)
+    match msg := cb.message:
+        case types.Message:
+            await msg.answer_photo(
+                photo=photo, caption=caption, reply_markup=reply_markup
+            )
 
     return slider
 
 
-@router.callback_query(F.data.regexp(r'(next|prev)_skin'), ShopState.SkinSlider)
-async def update_skin_slider(
-        cb: types.CallbackQuery,
-        state: FSMContext
-):
+@router.callback_query(F.data.regexp(r"(next|prev)_skin"), ShopState.SkinSlider)
+async def update_skin_slider(cb: types.CallbackQuery, state: FSMContext):
     """
     Handles navigation through the skin slider (next/previous).
 
@@ -139,36 +148,42 @@ async def update_skin_slider(
     """
 
     state_data = await state.get_data()
-    slider = state_data['skin_slider']
+    slider = state_data["skin_slider"]
 
-    past_i = slider['pos']
+    past_i = slider["pos"]
 
-    if cb.data == 'prev_skin':
-        curr_i = past_i - 1 if past_i != 0 else slider['skin_count'] - 1
+    if cb.data == "prev_skin":
+        curr_i = past_i - 1 if past_i != 0 else slider["skin_count"] - 1
     else:
-        curr_i = past_i + 1 if past_i != slider['skin_count'] - 1 else 0
+        curr_i = past_i + 1 if past_i != slider["skin_count"] - 1 else 0
 
-    slider['pos'] = curr_i
-    media = InputMediaPhoto(media=slider['skin_images'][curr_i],
-                            caption=get_skin_caption(slider['skin_names'][curr_i], slider['skins_descr'][curr_i])
-                            )
+    slider["pos"] = curr_i
+    media = InputMediaPhoto(
+        media=slider["skin_images"][curr_i],
+        caption=get_skin_caption(
+            slider["skin_names"][curr_i], slider["skins_descr"][curr_i]
+        ),
+    )
 
-    reply_markup = get_skin_slider_menu(skin_id=slider['skin_ids'][curr_i],
-                                        curr_pos=curr_i + 1,
-                                        skins_count=slider['skin_count']
-                                        )
+    reply_markup = get_skin_slider_menu(
+        skin_id=slider["skin_ids"][curr_i],
+        curr_pos=curr_i + 1,
+        skins_count=slider["skin_count"],
+    )
 
     await state.update_data(skin_slider=slider)
-    await cb.message.edit_media(media=media)
-    await cb.message.edit_reply_markup(reply_markup=reply_markup)
+    match cb.message:
+        case types.Message:
+            await cb.message.edit_media(media=media)
+            await cb.message.edit_reply_markup(reply_markup=reply_markup)
 
 
-@router.callback_query(SkinCallback.filter(F.action == 'view'), ShopState.SkinSlider)
+@router.callback_query(SkinCallback.filter(F.action == "view"), ShopState.SkinSlider)
 async def show_skin(
-        cb: types.CallbackQuery,
-        state: FSMContext,
-        callback_data: SkinCallback,
-        session: AsyncSession
+    cb: types.CallbackQuery,
+    state: FSMContext,
+    callback_data: SkinCallback,
+    session: AsyncSession,
 ):
     """
     Handles the transition to viewing specific exteriors of a selected skin.
@@ -185,16 +200,23 @@ async def show_skin(
 
     skin_id = callback_data.id
 
-    ext_slider = await start_ext_slider(cb=cb, session=session, skin_id=skin_id, start_i=0)
-    await state.update_data(ext_slider=ext_slider)
-    await state.set_state(ShopState.ExtSlider)
+    try:
+        ext_slider = await start_ext_slider(
+            cb=cb, session=session, skin_id=skin_id, start_i=0
+        )
+        await state.update_data(ext_slider=ext_slider)
+        await state.set_state(ShopState.ExtSlider)
+
+    except DataRetrievalError:
+        match msg := cb.message:
+            case types.Message:
+                await msg.answer(
+                    "An error occurred while processing your request. Please try again later."
+                )
 
 
-@router.callback_query(F.data == 'back_to_sub_cat_page', ShopState.SkinSlider)
-async def back_to_sub_cat_page(
-        cb: types.CallbackQuery,
-        state: FSMContext
-):
+@router.callback_query(F.data == "back_to_sub_cat_page", ShopState.SkinSlider)
+async def back_to_sub_cat_page(cb: types.CallbackQuery, state: FSMContext):
     """
     Handles the callback to return to the sub-category page.
 
@@ -206,4 +228,6 @@ async def back_to_sub_cat_page(
     """
 
     await state.set_state(ShopState.CategoryPage)
-    await cb.message.delete()
+    match cb.message:
+        case types.Message:
+            await cb.message.delete()

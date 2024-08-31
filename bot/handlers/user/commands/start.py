@@ -5,11 +5,11 @@ Handlers:
     - command_start: Sends a welcome message to the user when they use the /start command.
 """
 
-from aiogram import types, Router
+from aiogram import Router, types
 from aiogram.filters import CommandStart
 
 
-def get_start_msg(name: str):
+def get_start_msg(name: str = ""):
     """
     Generates a welcome message for the user.
 
@@ -29,7 +29,7 @@ def get_start_msg(name: str):
 ❓ Something went wrong? Type /help and admins solve ur problem"""
 
 
-router = Router(name='start')
+router = Router(name="start")
 
 
 @router.message(CommandStart())
@@ -40,4 +40,8 @@ async def command_start(msg: types.Message):
     Args:
         msg (types.Message): The message object containing the /start command from the user.
     """
-    await msg.answer(text=get_start_msg(msg.from_user.full_name))
+    match user := msg.from_user:
+        case types.User:
+            await msg.answer(text=get_start_msg(user.full_name))
+        case None:
+            await msg.answer(text=get_start_msg())

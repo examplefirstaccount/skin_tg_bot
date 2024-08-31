@@ -5,26 +5,21 @@ Handler:
     - show_categories: Displays available categories when the user enters the /shop command.
 """
 
-from aiogram import types, Router
+from aiogram import Router, types
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
-
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from bot.states import ShopState
 from bot.db.models import Category
 from bot.keyboards.inline import get_categories
+from bot.states import ShopState
 
-router = Router(name='shop')
+router = Router(name="shop")
 
 
-@router.message(Command(commands='shop'))
-async def show_categories(
-        msg: types.Message,
-        state: FSMContext,
-        session: AsyncSession
-):
+@router.message(Command(commands="shop"))
+async def show_categories(msg: types.Message, state: FSMContext, session: AsyncSession):
     """
     Displays a list of all categories available in the shop.
 
@@ -40,6 +35,10 @@ async def show_categories(
     sql_query = select(Category)
     result = await session.execute(sql_query)
     data = result.scalars().all()
+    if len(data) == 0:
+        await msg.answer(
+            "An error occurred while processing your request. Please try again later."
+        )
 
     await state.set_state(ShopState.Catalog)
-    await msg.answer('Here are all categories', reply_markup=get_categories(data=data))
+    await msg.answer("Here are all categories", reply_markup=get_categories(data=data))

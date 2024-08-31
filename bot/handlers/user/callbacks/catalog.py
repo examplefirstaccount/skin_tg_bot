@@ -7,26 +7,25 @@ Handlers:
     - answer_empty_callback: Handles empty callback data without any action.
 """
 
-from aiogram import types, Router, F
+from aiogram import F, Router, types
 from aiogram.fsm.context import FSMContext
-
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from bot.states import ShopState
 from bot.db.models import SubCategory
-from bot.utils.callbacks import CategoryCallback
 from bot.keyboards.inline import get_sub_cats
+from bot.states import ShopState
+from bot.utils.callbacks import CategoryCallback
 
-router = Router(name='catalog')
+router = Router(name="catalog")
 
 
-@router.callback_query(CategoryCallback.filter(F.action == 'view'), ShopState.Catalog)
+@router.callback_query(CategoryCallback.filter(F.action == "view"), ShopState.Catalog)
 async def show_sub_categories(
-        cb: types.CallbackQuery,
-        state: FSMContext,
-        callback_data: CategoryCallback,
-        session: AsyncSession
+    cb: types.CallbackQuery,
+    state: FSMContext,
+    callback_data: CategoryCallback,
+    session: AsyncSession,
 ):
     """
     Displays sub-categories when a category is selected.
@@ -45,13 +44,27 @@ async def show_sub_categories(
     sql_query = select(SubCategory).filter_by(category_id=cat_id)
     result = await session.execute(sql_query)
     data = result.scalars().all()
+    if len(data) == 0:
+        match msg := cb.message:
+            case types.Message:
+                await msg.answer(
+                    "An error occurred while processing your request. Please try again later."
+                )
+                return
 
     await state.set_state(ShopState.CategoryPage)
     await state.update_data(cat_id=cat_id)
-    await cb.message.answer('Here are all items in category', reply_markup=get_sub_cats(cat_id=cat_id, data=data))
+    match msg := cb.message:
+        case types.Message:
+            await msg.answer(
+                "Here are all items in category",
+                reply_markup=get_sub_cats(cat_id=cat_id, data=data),
+            )
+        case _:
+            print("Message to be answered is inaccessible or missing")
 
 
-@router.callback_query(F.data == 'back_to_main_menu', ShopState.Catalog)
+@router.callback_query(F.data == "back_to_main_menu", ShopState.Catalog)
 async def back_to_menu(cb: types.CallbackQuery):
     """
     Handles the callback for returning to the main menu from the catalog.
@@ -61,10 +74,12 @@ async def back_to_menu(cb: types.CallbackQuery):
     Args:
         cb (types.CallbackQuery): The callback query object from the user.
     """
-    await cb.message.delete()
+    match cb.message:
+        case types.Message:
+            await cb.message.delete()
 
 
-@router.callback_query(F.data == '#')
+@router.callback_query(F.data == "#")
 async def answer_empty_callback(cb: types.CallbackQuery):
     """
     Handles empty callback data without any action.

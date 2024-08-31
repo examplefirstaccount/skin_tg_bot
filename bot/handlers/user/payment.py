@@ -8,22 +8,18 @@ Handlers and Functions:
     - success_payment: Handles successful payment notifications.
 """
 
-from aiogram import types, Bot, Router, F
+from aiogram import Bot, F, Router, types
 from aiogram.fsm.context import FSMContext
 from aiogram.types import LabeledPrice
 
-from bot.data.config import TOKEN_SBER, TOKEN_PAYMASTER
+from bot.data.config import TOKEN_PAYMASTER, TOKEN_SBER
 from bot.states import ShopState
 from bot.utils.api.skins import get_ex_rate
 
-router = Router(name='payment')
+router = Router(name="payment")
 
 
-def generate_invoice(
-        title: str,
-        price: float,
-        method: str
-) -> dict:
+def generate_invoice(title: str, price: float, method: str) -> dict:
     """
     Generates an invoice for a payment request.
 
@@ -36,24 +32,21 @@ def generate_invoice(
         dict: A dictionary containing the invoice details.
     """
 
-    tokens = {'sber': TOKEN_SBER, 'paymaster': TOKEN_PAYMASTER}
-    return {'title': title,
-            'description': 'good choice',
-            'payload': 'payment',
-            'provider_token': tokens[method],
-            'currency': 'RUB',
-            'start_parameter': 'testing_bot',
-            'prices': [LabeledPrice(label=title, amount=int(price*100))],
-            'need_email': True
-            }
+    tokens = {"sber": TOKEN_SBER, "paymaster": TOKEN_PAYMASTER}
+    return {
+        "title": title,
+        "description": "good choice",
+        "payload": "payment",
+        "provider_token": tokens[method],
+        "currency": "RUB",
+        "start_parameter": "testing_bot",
+        "prices": [LabeledPrice(label=title, amount=int(price * 100))],
+        "need_email": True,
+    }
 
 
 async def send_invoice(
-        cb: types.CallbackQuery,
-        bot: Bot,
-        title: str,
-        price: float,
-        method: str
+    cb: types.CallbackQuery, bot: Bot, title: str, price: float, method: str
 ):
     """
     Sends an invoice to the user based on the selected payment method.
@@ -69,18 +62,17 @@ async def send_invoice(
         method (str): The payment method chosen by the user ('sber' or 'paymaster').
     """
 
-    exchange_rate = get_ex_rate('RUB')
+    exchange_rate = get_ex_rate("RUB")
     price_rub = price * exchange_rate
 
-    invoice_data = generate_invoice(title=title, price=round(price_rub, 2), method=method)
+    invoice_data = generate_invoice(
+        title=title, price=round(price_rub, 2), method=method
+    )
     await bot.send_invoice(chat_id=cb.from_user.id, **invoice_data)
 
 
 @router.pre_checkout_query(ShopState.Payment)
-async def process_pre_checkout_query(
-        query: types.PreCheckoutQuery,
-        bot: Bot
-):
+async def process_pre_checkout_query(query: types.PreCheckoutQuery, bot: Bot):
     """
     Processes the pre-checkout query to approve the payment.
 
@@ -95,10 +87,7 @@ async def process_pre_checkout_query(
 
 
 @router.message(F.types.ContentType.SUCCESSFUL_PAYMENT, ShopState.Payment)
-async def success_payment(
-        msg: types.Message,
-        state: FSMContext
-):
+async def success_payment(msg: types.Message, state: FSMContext):
     """
     Handles the event when the user successfully completes a payment.
 
@@ -110,6 +99,8 @@ async def success_payment(
         state (FSMContext): The current FSM state of the user.
     """
 
-    if msg.successful_payment.invoice_payload == 'payment':
-        await msg.answer('Thank you for your order. You will get instructions on your email.')
+    if msg.successful_payment and msg.successful_payment.invoice_payload == "payment":
+        await msg.answer(
+            "Thank you for your order. You will get instructions on your email."
+        )
         await state.set_state(state=None)
