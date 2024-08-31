@@ -148,14 +148,7 @@ Project Link: [https://github.com/examplefirstaccount/skin_tg_bot](https://githu
 
 ---
 
-# Garbage section 
-
-## TODO
-
-- TODO: add tests
-- TODO: make CI
-
-## Useful commands
+# Useful commands
 
 ```bash
 pg_dump -U postgres -h localhost -d skinTgBot -F c -f backup.dump
@@ -164,7 +157,7 @@ docker exec -it your_container_name bash
 pg_restore -U your_pg_user -d your_pg_db -F c /backup.dump  # or pg_restore -U myUser -d skinTgBot -F c --no-owner --role=your_user backup.dump
 ```
 
-## Useful Links
+# Useful Links
 
 ### Aiogram
 - https://www.youtube.com/playlist?list=PLN0sMOjX-lm5BMwTm-llmJuA50umZJOsL - video guide for aiogram 3.0
@@ -172,15 +165,12 @@ pg_restore -U your_pg_user -d your_pg_db -F c /backup.dump  # or pg_restore -U m
 - https://github.com/MasterGroosha/aiogram-and-sqlalchemy-demo/tree/master/bot/
 - https://github.com/MassonNN/masson-aiogram-template
 
-### GitHub
-- https://github.com/TimNekk?tab=overview&from=2023-07-01&to=2023-07-16 - good github profile
-
 ### Redis
 - https://blog.logrocket.com/guide-to-fully-understanding-redis/
 - https://www.tutorialspoint.com/redis/redis_quick_guide.htm
 
 ### SQLAlchemy
-- https://www.youtube.com/watch?v=hkvngd_BUrY - async
+- https://www.youtube.com/watch?v=hkvngd_BUrY
 
-### Skins images
+### Skin images
 https://cdn.csgoskins.gg/public/videos/floats/v1/embedding/galil-ar-orange-ddpat.webm - Perfect images for skin bot, but hard to parse (no exteriors, just Factory new)
