@@ -6,7 +6,7 @@ lint:
 
 format:
 	poetry run black bot
-	poetry run ruff check --fix bot
+	poetry run ruff check --fix --select I bot
 
 security-check:
 	poetry run bandit -r bot
