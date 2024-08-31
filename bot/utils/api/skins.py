@@ -49,6 +49,7 @@ def get_ext_prices(ext_ids: list) -> dict:
         cookies=cookies,
         headers=headers,
         json=json_data,
+        timeout=10
     )
     if response.status_code == 200:
         data = response.json()["data"]["price_trader_log"]
@@ -107,6 +108,7 @@ def get_ext_images(skin_name: str) -> dict:
         cookies=cookies,
         headers=headers,
         json=json_data,
+        timeout=10
     )
     if response.status_code == 200:
         data = response.json()["data"]["pattern_list"]
@@ -143,7 +145,7 @@ def get_ex_rate(key: str):
     """
 
     url = f"{CURRENCY_API_ENDPOINT}?api_key={config.CURRENCY_API_KEY}&from=USD&to={key}"
-    response = requests.get(url)
+    response = requests.get(url, timeout=10)
     if response.status_code == 200:
         res = response.json()
         if res["error"] == 0:
