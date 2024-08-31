@@ -60,7 +60,7 @@ To start interacting with the bot, open Telegram and send the command /start to 
    pg_password = <your_password>
    pg_db = skinTgBot
    redis_host = redis
-   redis_db = 0 # Change this if you have Redis image and index 0 is already taken
+   redis_db = 0 # Change this if you have Redis image and index 0 is already taken.
    ```
 
    Tokens for testing:
@@ -92,7 +92,7 @@ To start interacting with the bot, open Telegram and send the command /start to 
    ```
 
 3. **Configure Environment Variables:**
-   Create a .env file in the root directory with the necessary variables as shown above.
+   Create a `.env` file in the root directory with the necessary variables as shown above.
 
 4. **Install Dependencies:**
    ```bash
@@ -152,9 +152,7 @@ Project Link: [https://github.com/examplefirstaccount/skin_tg_bot](https://githu
 
 ## TODO
 
-- TODO: add comments
 - TODO: add tests
-- TODO: fix typing using mypy
 - TODO: make CI
 
 ## Useful commands
