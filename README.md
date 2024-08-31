@@ -142,7 +142,7 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 
 ## Contact
 
-Your Name - [anr2024@gmail.com](mailto:anr2024@gmail.com)
+Mail: [anr2024@gmail.com](mailto:anr2024@gmail.com)
 
 Project Link: [https://github.com/examplefirstaccount/skin_tg_bot](https://github.com/examplefirstaccount/skin_tg_bot)
 
