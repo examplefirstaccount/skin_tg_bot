@@ -16,6 +16,8 @@
 
 This Telegram bot allows users to explore and purchase CS2 skins. It acts like a stock screener, displaying various skins with detailed information and facilitating purchases through connected payment systems (Sber and PayMaster). Currently, the bot serves as a template with a layout that focuses on the user-side experience, without direct integration with Steam for adding skins to the inventory.
 
+![Bot Interaction](assets/test-skin-bot.gif)
+
 ## Features
 
 - **Shop Catalog:** Browse skins by categories such as Knives, Rifles, and Pistols.
@@ -35,7 +37,7 @@ This Telegram bot allows users to explore and purchase CS2 skins. It acts like a
 
 ## Usage
 
-To start interacting with the bot, open Telegram and send the command /start to the [@my_bot](http://t.me/my_bot).
+To start interacting with the bot, open Telegram and send the command /start to the [@lol_servera_dorogiye](http://t.me/my_bot).
 
 ## Installation
 
