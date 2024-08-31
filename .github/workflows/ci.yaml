@@ -1,0 +1,35 @@
+name: CI Pipeline
+
+on: [push, pull_request]
+
+env:
+  POETRY_VERSION: "1.8.3"
+  DEFAULT_PY_VERSION: "3.12"
+
+jobs:
+  format-and-lint:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        with:
+          python-version: ${{ env.DEFAULT_PY_VERSION }}
+
+      - name: Install Poetry
+        shell: bash
+        run: pipx install poetry==${{ env.POETRY_VERSION }}
+
+      - name: Install dependencies
+        run: poetry install --only dev
+
+      - name: Run formatting
+        run: make format
+
+      - name: Run linting
+        run: make lint
+
+      - name: Run security checks
+        run: make security-check
