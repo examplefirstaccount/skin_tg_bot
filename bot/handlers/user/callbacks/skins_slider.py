@@ -126,7 +126,7 @@ async def start_skin_slider(
     )
 
     match msg := cb.message:
-        case types.Message:
+        case types.Message():
             await msg.answer_photo(
                 photo=photo, caption=caption, reply_markup=reply_markup
             )
@@ -173,7 +173,7 @@ async def update_skin_slider(cb: types.CallbackQuery, state: FSMContext):
 
     await state.update_data(skin_slider=slider)
     match cb.message:
-        case types.Message:
+        case types.Message():
             await cb.message.edit_media(media=media)
             await cb.message.edit_reply_markup(reply_markup=reply_markup)
 
@@ -209,7 +209,7 @@ async def show_skin(
 
     except DataRetrievalError:
         match msg := cb.message:
-            case types.Message:
+            case types.Message():
                 await msg.answer(
                     "An error occurred while processing your request. Please try again later."
                 )
@@ -229,5 +229,5 @@ async def back_to_sub_cat_page(cb: types.CallbackQuery, state: FSMContext):
 
     await state.set_state(ShopState.CategoryPage)
     match cb.message:
-        case types.Message:
+        case types.Message():
             await cb.message.delete()

@@ -46,7 +46,7 @@ async def show_sub_categories(
     data = result.scalars().all()
     if len(data) == 0:
         match msg := cb.message:
-            case types.Message:
+            case types.Message():
                 await msg.answer(
                     "An error occurred while processing your request. Please try again later."
                 )
@@ -55,7 +55,7 @@ async def show_sub_categories(
     await state.set_state(ShopState.CategoryPage)
     await state.update_data(cat_id=cat_id)
     match msg := cb.message:
-        case types.Message:
+        case types.Message():
             await msg.answer(
                 "Here are all items in category",
                 reply_markup=get_sub_cats(cat_id=cat_id, data=data),
@@ -75,7 +75,7 @@ async def back_to_menu(cb: types.CallbackQuery):
         cb (types.CallbackQuery): The callback query object from the user.
     """
     match cb.message:
-        case types.Message:
+        case types.Message():
             await cb.message.delete()
 
 

@@ -41,7 +41,7 @@ async def command_start(msg: types.Message):
         msg (types.Message): The message object containing the /start command from the user.
     """
     match user := msg.from_user:
-        case types.User:
+        case types.User():
             await msg.answer(text=get_start_msg(user.full_name))
         case None:
             await msg.answer(text=get_start_msg())

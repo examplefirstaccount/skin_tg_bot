@@ -45,7 +45,7 @@ async def send_payment_methods(
     )
     await state.set_state(ShopState.ChoosePaymentMethod)
     match msg := cb.message:
-        case types.Message:
+        case types.Message():
             await msg.answer(
                 "Choose payment method", reply_markup=get_payment_methods()
             )
@@ -67,7 +67,7 @@ async def back_to_ext_slider(cb: types.CallbackQuery, state: FSMContext):
 
     await state.set_state(ShopState.ExtSlider)
     match cb.message:
-        case types.Message:
+        case types.Message():
             await cb.message.delete()
         case _:
             print("Message to be deleted is inaccessible or missing")
@@ -127,7 +127,7 @@ async def back_from_payment_methods(cb: types.CallbackQuery, state: FSMContext):
         await state.set_state(ShopState.ChooseSkinType)
 
     match cb.message:
-        case types.Message:
+        case types.Message():
             await cb.message.delete()
         case _:
             print("Message to be deleted is inaccessible or missing")

@@ -51,7 +51,7 @@ async def show_skins(
 
     except DataRetrievalError:
         match msg := cb.message:
-            case types.Message:
+            case types.Message():
                 await msg.answer(
                     "An error occurred while processing your request. Please try again later."
                 )
@@ -76,5 +76,5 @@ async def back_to_category_page(
 
     await state.set_state(ShopState.Catalog)
     match cb.message:
-        case types.Message:
+        case types.Message():
             await cb.message.delete()

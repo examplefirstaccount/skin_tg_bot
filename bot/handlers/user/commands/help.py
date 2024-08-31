@@ -20,7 +20,7 @@ async def command_help(msg: types.Message):
         msg (types.Message): The message object containing the /help command from the user.
     """
     match user := msg.from_user:
-        case types.User:
+        case types.User():
             await msg.answer(f"Hey {user.first_name}, you need help?")
         case None:
             await msg.answer("Hey, you need help?")

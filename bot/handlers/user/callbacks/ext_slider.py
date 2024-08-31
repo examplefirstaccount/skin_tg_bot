@@ -187,7 +187,7 @@ async def start_ext_slider(
     )
 
     match msg := cb.message:
-        case types.Message:
+        case types.Message():
             await msg.answer_photo(
                 photo=photo, caption=caption, reply_markup=reply_markup
             )
@@ -241,7 +241,7 @@ async def update_slider(cb: types.CallbackQuery, state: FSMContext):
 
         await state.update_data(ext_slider=slider)
         match msg := cb.message:
-            case types.Message:
+            case types.Message():
                 await msg.edit_media(media=media)
                 await msg.edit_reply_markup(reply_markup=reply_markup)
             case _:
@@ -289,7 +289,7 @@ async def buy_skin(
         )
         await state.set_state(ShopState.ChoosePaymentMethod)
         match msg := cb.message:
-            case types.Message:
+            case types.Message():
                 await msg.answer(
                     "Choose payment method", reply_markup=get_payment_methods()
                 )
@@ -300,7 +300,7 @@ async def buy_skin(
 
         await state.set_state(ShopState.ChooseSkinType)
         match msg := cb.message:
-            case types.Message:
+            case types.Message():
                 await msg.answer("Choose a type of skin", reply_markup=reply_markup)
             case _:
                 print("Message to be answered is inaccessible or missing")
@@ -320,7 +320,7 @@ async def back_to_skin_slider(cb: types.CallbackQuery, state: FSMContext):
 
     await state.set_state(ShopState.SkinSlider)
     match cb.message:
-        case types.Message:
+        case types.Message():
             await cb.message.delete()
         case _:
             print("Message to be deleted is inaccessible or missing")
