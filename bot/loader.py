@@ -1,14 +1,16 @@
 from aiogram import Dispatcher
-from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.fsm.storage.base import BaseStorage
+from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.utils.callback_answer import CallbackAnswerMiddleware
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
-from bot.middlewares import DbSessionMiddleware
 from bot.handlers.user import user_routers
+from bot.middlewares import DbSessionMiddleware
 
 
-def get_dispatcher(session_pool: async_sessionmaker, storage: BaseStorage = MemoryStorage()):
+def get_dispatcher(
+    session_pool: async_sessionmaker, storage: BaseStorage = MemoryStorage()
+):
     """
     Creates and configures a Dispatcher instance with specified middlewares and handlers.
 

@@ -1,5 +1,5 @@
 from aiogram import Bot
-from aiogram.types import BotCommandScopeAllPrivateChats, BotCommand
+from aiogram.types import BotCommand, BotCommandScopeAllPrivateChats
 
 
 async def set_default_commands(bot: Bot):
@@ -18,12 +18,9 @@ async def set_default_commands(bot: Bot):
         Exception: If the commands could not be set due to API errors.
     """
     commands = [
-        BotCommand(command='start', description='Start bot'),
-        BotCommand(command='help', description='Contact with moderators'),
-        BotCommand(command='shop', description='Open shop catalog')
+        BotCommand(command="start", description="Start bot"),
+        BotCommand(command="help", description="Contact with moderators"),
+        BotCommand(command="shop", description="Open shop catalog"),
     ]
 
-    await bot.set_my_commands(
-        commands=commands,
-        scope=BotCommandScopeAllPrivateChats()
-    )
+    await bot.set_my_commands(commands=commands, scope=BotCommandScopeAllPrivateChats())
